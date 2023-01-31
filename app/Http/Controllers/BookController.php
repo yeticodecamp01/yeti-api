@@ -16,7 +16,10 @@ class BookController extends Controller
     {
         //
     }
-
+    public function authorBook()
+    {
+        //
+    }
     /**
      * Show the form for creating a new resource.
      *
