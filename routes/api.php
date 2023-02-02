@@ -23,10 +23,11 @@ Route::post("login",[AuthorsController::class,"login"]);
 Route::group(["middleware" => ["auth:api"]], function(){
 
     Route::get("profile",[AuthorsController::class,"profile"]);
-    Route::post("profile",[AuthorsController::class,"logout"]);
+    Route::post("logout",[AuthorsController::class,"logout"]);
 
 
-    Route::post("create-book",[BookController::class,"create"]);
+    Route::post("create-book",[BookController::class,"store"]);
+    Route::get("list-books", [BookController::class, "listBook"]);
     Route::post("author-books",[BookController::class,"authorBook"]);
     Route::post("single-book",[BookController::class,"show"]);
     Route::post("update/{id}",[BookController::class,"update"]);

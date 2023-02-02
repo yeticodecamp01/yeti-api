@@ -24,7 +24,7 @@ class AuthorsController extends Controller
             "password"=> "required|confirmed",
             "phone_no"=> "required"
         ]);
-        
+
         // save to database
         DB::table('authors')->insert([
             'name' => $request->name,
@@ -78,11 +78,24 @@ class AuthorsController extends Controller
 
     public function profile()
     {
-        //
+        $user_data = auth()->user();
+
+        return response()->json([
+            "status" => true,
+            "message" => "User Data",
+            "data" => $user_data
+        ]);
     }
-    public function logout()
+    public function logout(Request $request)
     {
-        //
+        $token = $request->user()->token();
+
+        $token->revoke();
+
+        return response()->json([
+            "status" => true,
+            "message" => "Logout Succesfully"
+        ]);
     }
 
     /**
