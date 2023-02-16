@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Authors;
 use App\Models\Book;
 use Illuminate\Http\Request;
 
@@ -16,10 +17,7 @@ class BookController extends Controller
     {
         //
     }
-    public function authorBook()
-    {
-        //
-    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -46,7 +44,7 @@ class BookController extends Controller
 
         // create book data
         $book = new Book();
-        $book->author_id = auth()->user()->id;
+        $book->authors_id = auth()->user()->id;
         $book->title = $request->title;
         $book->description = $request->description;
         $book->book_cost = $request->book_cost;
@@ -61,27 +59,55 @@ class BookController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Book  $book
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Book $book)
+    public function listBook()
     {
-        //
+        $books = Book::get();
+
+        return response()->json([
+            "status" => 1,
+            "message" => "All Books",
+            "data" => $books
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Book  $book
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Book $book)
+    // Author Book METHOD - GET
+    public function authorBook()
     {
-        //
+        $author_id = auth()->user()->id;
+        $books = Authors::find($author_id)->books;
+
+        return response()->json([
+            "status" => 1,
+            "message" => "Author Books",
+            "data" => $books
+        ]);
     }
+   // SINGLE BOOK METHOD - GET
+   public function singleBook($book_id)
+   {
+       $author_id = auth()->user()->id;
+
+       if (Book::where([
+           "authors_id" => $author_id,
+           "id" => $book_id
+       ])->exists()) {
+
+           $book = Book::find($book_id);
+
+           return response()->json([
+               "status" => true,
+               "message" => "Book data found",
+               "data" => $book
+           ]);
+       } else {
+
+           return response()->json([
+               "status" => false,
+               "message" => "Author Book doesn't exists"
+           ]);
+       }
+   }
+
 
     /**
      * Update the specified resource in storage.
@@ -90,10 +116,33 @@ class BookController extends Controller
      * @param  \App\Models\Book  $book
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Book $book)
-    {
-        //
-    }
+      // UPDATE METHOD - POST
+      public function updateBook(Request $request, $book_id)
+      {
+
+          $author_id = auth()->user()->id;
+
+          if (Book::where([
+              "authors_id" => $author_id,
+              "id" => $book_id
+          ])->exists()) {
+              $book = Book::find($book_id);
+              //print_r($request->all());die;
+              $book->title = isset($request->title) ? $request->title : $book->title;
+              $book->description = isset($request->description) ? $request->description : $book->description;
+              $book->book_cost = isset($request->book_cost) ? $request->book_cost : $book->book_cost;
+              $book->save();
+              return response()->json([
+                  "status" => 1,
+                  "message" => "Book data has been updated"
+              ]);
+          } else {
+              return response()->json([
+                  "status" => false,
+                  "message" => "Author Book doesn't exists"
+              ]);
+          }
+      }
 
     /**
      * Remove the specified resource from storage.
@@ -101,8 +150,31 @@ class BookController extends Controller
      * @param  \App\Models\Book  $book
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Book $book)
+
+    // DELETE METHOD - GET
+    public function deleteBook($book_id)
     {
-        //
+        $author_id = auth()->user()->id;
+
+        if (Book::where([
+            "authors_id" => $author_id,
+            "id" => $book_id
+        ])->exists()) {
+
+            $book = Book::find($book_id);
+
+            $book->delete();
+
+            return response()->json([
+                "status" => true,
+                "message" => "Book has been deleted"
+            ]);
+        }else{
+
+            return response()->json([
+                "status" => false,
+                "message" => "Author Book doesn't exists"
+            ]);
+        }
     }
 }
